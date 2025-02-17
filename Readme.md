@@ -10,7 +10,7 @@ This repository contains structured resources for mastering **Low-Level Design (
 
 ## 📂 Repository Structure  
 - `OOP/` – Fundamentals of Object-Oriented Programming  
-- `SOLID/` – Detailed explanations and examples of SOLID principles  
+- `solid-principles/` – Detailed explanations and examples of SOLID principles  
 - `DesignPatterns/` – Common design patterns with real-world use cases  
 - `LLD/` – System design problems with solutions  
 
