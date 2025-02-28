@@ -1,34 +1,69 @@
-from user import User
-from train import Train
-from train_seat import TrainSeat
-from ticket import Ticket
-from payment import Payment
-from train_seat_type import StandardSeat, DeluxeSeat, ExecutiveSeat
-from ticket_status import BookedStatus, CanceledStatus, WaitlistedStatus
-from payment_status import SuccessPayment, FailedPayment, InProgressPayment
+from datetime import datetime
+from train_seat_type import StandardSeat, DeluxeSeat
+from ticket_booking_system import TicketBookingSystem
+
+# Initialize Ticket Booking System
+ticket_booking_system = TicketBookingSystem()
 
 # Create Users
-user1 = User(1, "Aman", "aman@example.com", "1234567890")
+ticket_booking_system.add_user("Aman", "aman@example.com", "1234567890")
 
-# Create a Train
-train1 = Train(101, "Express 101", "Delhi", "Mumbai", "08:00 AM", "10:00 PM")
+# Create Trains
+ticket_booking_system.add_train(1, "Rajdhani Express", 
+                                {"Delhi": (0, datetime.strptime("08:00", "%H:%M").time()),
+                                 "Mumbai": (1440, datetime.strptime("20:00", "%H:%M").time())},
+                                {StandardSeat(): 5, DeluxeSeat(): 3})
 
-# Create Train Seats
-seat1 = TrainSeat(1, train1.train_id, StandardSeat())
-seat2 = TrainSeat(2, train1.train_id, DeluxeSeat())
-train1.seats.append(seat1)
-train1.seats.append(seat2)
+# Search for Trains
+print("Searching for trains from Delhi to Mumbai:")
+available_trains = ticket_booking_system.search_trains("Delhi", "Mumbai")
+for train in available_trains:
+    print(f"Train ID: {train.train_id}, Train Name: {train.train_name}\n")
+
+print("---------")
 
 # Book a Ticket
-ticket1 = Ticket(1001, user1.user_id, train1.train_id, [seat1, seat2])
-ticket1.status.append(BookedStatus())  # Mark seats as booked
-user1.tickets.append(ticket1)
+if available_trains:
+    selected_train = available_trains[0]  # Select the first available train
+    seats_to_book = {StandardSeat(): 1, DeluxeSeat(): 1}
+    print(f"Trying to book ticket for Train ID: {selected_train.train_id}")
+    ticket1 = ticket_booking_system.book_ticket(1, selected_train.train_id, "Delhi", "Mumbai", 
+                                                datetime.strptime("2025-03-05", "%Y-%m-%d").date(), 
+                                                seats_to_book)
+    if ticket1:
+        print(f"Ticket ID: {ticket1.ticket_id}, Train ID: {ticket1.train_id}\n" +
+              f"Origin: {ticket1.origin}, Destination: {ticket1.destination}\n" +
+              f"Date of Journey: {ticket1.date_of_journey}\n" +
+              f"Status: {ticket1.ticket_status}, Seats:\n")
+        for seat in ticket1.seats:
+            print(f"Seat ID: {seat.seat_id}, Seat Type: {seat.seat_type.class_name}")
 
-# Process Payment
-payment1 = Payment(5001, ticket1.ticket_id, 250.0, "Credit Card", SuccessPayment())
+print("---------")
 
-# Output
-print(f"User: {user1.name} booked Ticket ID: {ticket1.ticket_id} on Train {train1.train_name}")
-print(f"Seats: {[seat.seat_type.get_class_name() for seat in ticket1.seats]}")
-print(f"Ticket Status: {[status.get_status() for status in ticket1.status]}")
-print(f"Payment Status: {payment1.payment_status.get_status()}")
+# Get Tickets for a User
+tickets = ticket_booking_system.get_tickets(1)
+if tickets:
+    print("\nTickets for User ID: 1")
+    for ticket in tickets:
+        print(f"Ticket ID: {ticket.ticket_id}, Train ID: {ticket.train_id}\n" +
+              f"Origin: {ticket.origin}, Destination: {ticket.destination}\n" +
+              f"Date of Journey: {ticket.date_of_journey}\n" +
+              f"Status: {ticket.ticket_status}, Seats:\n")
+        for seat in ticket.seats:
+            print(f"Seat ID: {seat.seat_id}, Seat Type: {seat.seat_type.class_name}")
+        print("\n")
+
+print("---------")
+# Cancel a Ticket
+ticket_cancel_status = ticket_booking_system.cancel_ticket(1, 1)
+print("---------")
+
+# Verify tickets for a user after canceling a ticket
+tickets = ticket_booking_system.get_tickets(1)
+if tickets:
+    print("\nTickets for User ID: 1")
+    for ticket in tickets:
+        print(f"Ticket ID: {ticket.ticket_id}, Train ID: {ticket.train_id}\n" +
+              f"Origin: {ticket.origin}, Destination: {ticket.destination}\n" +
+              f"Date of Journey: {ticket.date_of_journey}\n" +
+              f"Status: {ticket.ticket_status}\n")
