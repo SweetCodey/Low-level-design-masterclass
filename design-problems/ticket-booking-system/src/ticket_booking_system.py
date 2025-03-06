@@ -14,7 +14,7 @@ class TicketBookingSystem:
         self.payment_manager = PaymentManager()
         self.train_manager = TrainManager()
         self.user_manager = UserManager()
-        self.ticket_manager = TicketManager()
+        self.ticket_manager = TicketManager(self.train_manager)
         self.seat_assignment_strategy = FirstAvailableSeatsStrategy()
         self.pricing_manager = PricingManager(self.train_manager)
 

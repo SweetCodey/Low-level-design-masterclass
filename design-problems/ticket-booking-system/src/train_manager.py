@@ -3,6 +3,21 @@ from datetime import datetime
 
 from train_seat_type import TrainSeatType
 
+class TrainSeat:
+    def __init__(self, seat_id: int, train_id: int, seat_type: TrainSeatType):
+        self.seat_id = seat_id
+        self.train_id = train_id
+        self.seat_type = seat_type
+        self.__is_booked = False
+
+    def book(self):
+        self.__is_booked = True
+
+    def unbook(self):
+        self.__is_booked = False
+
+    def is_booked(self):
+        return self.__is_booked
 
 class TrainManager:
     def __init__(self):
@@ -33,22 +48,23 @@ class TrainManager:
                 trains.append(train)
         return trains
 
-
-class TrainSeat:
-    def __init__(self, seat_id: int, train_id: int, seat_type: TrainSeatType):
-        self.seat_id = seat_id
-        self.train_id = train_id
-        self.seat_type = seat_type
-        self.__is_booked = False
-
-    def book(self):
-        self.__is_booked = True
-
-    def unbook(self):
-        self.__is_booked = False
-
-    def is_booked(self):
-        return self.__is_booked
+    def book_seats(self, seats: List[TrainSeat]) -> bool:
+        """
+        Books the provided seats if available
+        """ 
+        for seat in seats:
+            if seat.is_booked():
+                return False
+            seat.book()
+        return True
+        
+    def unbook_seats(self, seats: List[TrainSeat]) -> bool:
+        """
+        Unbooks the provided seats
+        """
+        for seat in seats:
+            seat.unbook()
+        return True
 
 
 # For simplicity we assume all the trains run on all weekdays

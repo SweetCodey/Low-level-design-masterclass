@@ -2,22 +2,15 @@ from typing import List
 from datetime import datetime
 from collections import defaultdict
 
-from train_manager import TrainSeat
+from train_manager import TrainSeat, TrainManager
 
 
 class TicketManager:
-    def __init__(self):
+    def __init__(self, train_manager: TrainManager):
         # {user_id: [Ticket1, Ticket2, ...]}
         self.tickets = defaultdict(list)
         self.ticket_counter = 1
-
-    def book_seats(self, seats: List[TrainSeat]):
-        for seat in seats:
-            seat.book()
-
-    def unbook_seats(self, seats: List[TrainSeat]):
-        for seat in seats:
-            seat.unbook()
+        self.train_manager = train_manager
 
     def book_ticket(
         self,
@@ -28,8 +21,12 @@ class TicketManager:
         date_of_journey: datetime.date,
         seats: List[TrainSeat],
     ):
-        # Book the seats first
-        self.book_seats(seats)
+        # Book the seats using train manager
+        booking_success = self.train_manager.book_seats(seats)
+        
+        if not booking_success:
+            print("Failed to book seats - invalid train or seats already booked\n")
+            return None
 
         ticket = Ticket(
             self.ticket_counter,
@@ -57,11 +54,15 @@ class TicketManager:
                 print("Cannot cancel the ticket. Not within 3 days of journey.\n")
                 return False
 
-            ticket.set_cancelled_status()
-            self.unbook_seats(ticket.seats)
-
-            print(f"Ticket ID: {ticket_id} has been canceled.\n")
-            return True
+            # Unbook seats using train manager
+            unbooking_success = self.train_manager.unbook_seats(ticket.seats)
+            if unbooking_success:
+                ticket.set_cancelled_status()
+                print(f"Ticket ID: {ticket_id} has been canceled.\n")
+                return True
+            else:
+                print(f"Failed to cancel ticket ID: {ticket_id}\n")
+                return False
         return False
 
 
