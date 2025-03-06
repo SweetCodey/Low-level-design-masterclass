@@ -9,6 +9,7 @@ from user_manager import UserManager
 from seat_assignment_strategy import FirstAvailableSeatsStrategy
 from pricing_manager import PricingManager
 
+
 class TicketBookingSystem:
     def __init__(self):
         self.payment_manager = PaymentManager()
