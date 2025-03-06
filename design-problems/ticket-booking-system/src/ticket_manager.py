@@ -5,6 +5,7 @@ from collections import defaultdict
 from train_manager import TrainSeat, TrainManager
 
 
+
 class TicketManager:
     def __init__(self, train_manager: TrainManager):
         # {user_id: [Ticket1, Ticket2, ...]}
@@ -21,7 +22,6 @@ class TicketManager:
         date_of_journey: datetime.date,
         seats: List[TrainSeat],
     ):
-        # Book the seats using train manager
         booking_success = self.train_manager.book_seats(seats)
         
         if not booking_success:
@@ -54,7 +54,6 @@ class TicketManager:
                 print("Cannot cancel the ticket. Not within 3 days of journey.\n")
                 return False
 
-            # Unbook seats using train manager
             unbooking_success = self.train_manager.unbook_seats(ticket.seats)
             if unbooking_success:
                 ticket.set_cancelled_status()

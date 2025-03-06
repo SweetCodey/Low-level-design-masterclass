@@ -66,7 +66,6 @@ class TrainManager:
             seat.unbook()
         return True
 
-
 # For simplicity we assume all the trains run on all weekdays
 class Train:
     def __init__(
