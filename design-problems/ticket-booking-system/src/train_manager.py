@@ -3,6 +3,7 @@ from datetime import datetime
 
 from train_seat_type import TrainSeatType
 
+
 class TrainSeat:
     def __init__(self, seat_id: int, train_id: int, seat_type: TrainSeatType):
         self.seat_id = seat_id
@@ -18,6 +19,7 @@ class TrainSeat:
 
     def is_booked(self):
         return self.__is_booked
+
 
 class TrainManager:
     def __init__(self):
@@ -50,14 +52,19 @@ class TrainManager:
 
     def book_seats(self, seats: List[TrainSeat]) -> bool:
         """
-        Books the provided seats if available
-        """ 
+        Books the provided seats if all are available. This is an atomic operation -
+        either all seats are booked or none.
+        """
+        # First check if all seats are available
         for seat in seats:
             if seat.is_booked():
                 return False
+
+        # If all seats are available, book them all
+        for seat in seats:
             seat.book()
         return True
-        
+
     def unbook_seats(self, seats: List[TrainSeat]) -> bool:
         """
         Unbooks the provided seats
@@ -65,6 +72,7 @@ class TrainManager:
         for seat in seats:
             seat.unbook()
         return True
+
 
 # For simplicity we assume all the trains run on all weekdays
 class Train:

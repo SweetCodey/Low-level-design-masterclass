@@ -5,7 +5,6 @@ from collections import defaultdict
 from train_manager import TrainSeat, TrainManager
 
 
-
 class TicketManager:
     def __init__(self, train_manager: TrainManager):
         # {user_id: [Ticket1, Ticket2, ...]}
@@ -23,7 +22,7 @@ class TicketManager:
         seats: List[TrainSeat],
     ):
         booking_success = self.train_manager.book_seats(seats)
-        
+
         if not booking_success:
             print("Failed to book seats - invalid train or seats already booked\n")
             return None
