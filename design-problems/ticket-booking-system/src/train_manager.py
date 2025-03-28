@@ -20,6 +20,34 @@ class TrainSeat:
     def is_booked(self):
         return self.__is_booked
 
+# For simplicity we assume all the trains run on all weekdays
+class Train:
+    def __init__(
+        self,
+        train_id: int,
+        train_name: str,
+        schedule: dict[str : (int, datetime.time)],
+        seats: dict[TrainSeatType:int],
+    ):
+        self.train_id: int = train_id
+        self.train_name: int = train_name
+        # schedule: {location: (distance, time)}
+        self.schedule: dict[str : (int, datetime.time)] = schedule
+        self.origin: str = list(schedule.keys())[0]
+        self.destination: str = list(schedule.keys())[-1]
+        self.seats: List[TrainSeat] = self.add_seats(seats)
+
+    def add_seats(self, seats: dict[TrainSeatType:int]):
+        train_seats = []
+        for seat_type, count in seats.items():
+            for i in range(count):
+                train_seats.append(
+                    TrainSeat(len(train_seats) + 1, self.train_id, seat_type)
+                )
+        return train_seats
+
+    def get_distance(self, origin: str, destination: str):
+        return self.schedule[destination][0] - self.schedule[origin][0]
 
 class TrainManager:
     def __init__(self):
@@ -36,7 +64,7 @@ class TrainManager:
         self.trains[train_id] = train
         print(f"Train {train_name} with ID {train_id} has been added successfully.\n")
 
-    def get_train(self, train_id: int):
+    def get_train(self, train_id: int) -> Train:
         return self.trains.get(train_id)
 
     def search_trains(self, origin: str, destination: str):
@@ -72,33 +100,3 @@ class TrainManager:
         for seat in seats:
             seat.unbook()
         return True
-
-
-# For simplicity we assume all the trains run on all weekdays
-class Train:
-    def __init__(
-        self,
-        train_id: int,
-        train_name: str,
-        schedule: dict[str : (int, datetime.time)],
-        seats: dict[TrainSeatType:int],
-    ):
-        self.train_id: int = train_id
-        self.train_name: int = train_name
-        # schedule: {location: (distance, time)}
-        self.schedule: dict[str : (int, datetime.time)] = schedule
-        self.origin: str = list(schedule.keys())[0]
-        self.destination: str = list(schedule.keys())[-1]
-        self.seats: List[TrainSeat] = self.add_seats(seats)
-
-    def add_seats(self, seats: dict[TrainSeatType:int]):
-        train_seats = []
-        for seat_type, count in seats.items():
-            for i in range(count):
-                train_seats.append(
-                    TrainSeat(len(train_seats) + 1, self.train_id, seat_type)
-                )
-        return train_seats
-
-    def get_distance(self, origin: str, destination: str):
-        return self.schedule[destination][0] - self.schedule[origin][0]
