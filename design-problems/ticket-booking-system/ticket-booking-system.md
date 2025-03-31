@@ -47,6 +47,8 @@ Also, something to notice - Since UserManager class will be managing users we al
 
 ### 4. Start Writing Code
 
+#### User Manager
+
 Let's start implementing our system, beginning with the simplest class 'UserManager'.
 
 ```
@@ -70,7 +72,10 @@ class User:
         self.phone = phone
 ```
 
+#### Train Manager
+
 Now, let's try implementing TrainManager.  The main idea is to implement the methods we planned earlier (i.e. search_trains). So, for that we create a dictionary of trains from which we will search. But in order to search trains we first need to add trains in that dictionary. Now how do we do it? Well, we need to add another method 'add_train' for that. This method will simply initialize a new train and then add it to the 'trains' dictionary.
+
 **Something to observe**: We created a new method 'add_train' only when we needed it. We never created a method beforehand. And that is the mentality one should have to write code clearly and complete the problem in an interview setting.
 
 ```
@@ -115,4 +120,46 @@ class TrainManager:
             ):
                 trains.append(train)
         return trains
+```
+
+#### Payment Manager
+
+Now, we can move on to implement 'PaymentManager'. Since, it is a big design for an interview setting and the focus is not on payments we can have a very simplified version for it. We will simply return True for all the cases.
+
+Note: If the interviewer is interested in payments then only go ahead and implement it.
+
+```
+class PaymentManager:
+    def process_payment(self, user_id: int, amount: float) -> bool:
+        # For simplicity, we are assuming that the payment is successful
+        print(f"Payment of {amount} processed for user {user_id}")
+        return True
+```
+
+#### Ticket Manager
+
+It's time now to implement 'TicketManager'. Since this class manages tickets we first need to implement Ticket class. Now, think of an actual ticket in your hand. What does that consist of? Train Id, Origin, Destination, Date of Journey, etc.
+
+![Ticket](./images/Ticket.png)
+
+So, that's what we fill in this class.
+
+```
+class Ticket:
+    def __init__(
+        self,
+        ticket_id: int,
+        user_id: int,
+        train_id: int,
+        origin: str,
+        destination: str,
+        date_of_journey: datetime.date,
+    ):
+        self.ticket_id: int = ticket_id
+        self.user_id: int = user_id
+        self.train_id: int = train_id
+        self.origin: str = origin
+        self.destination: str = destination
+        self.date_of_journey: datetime.date = date_of_journey
+        self.ticket_status: str = "CONFIRMED"
 ```
