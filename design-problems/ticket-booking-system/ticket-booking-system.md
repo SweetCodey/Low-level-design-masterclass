@@ -125,7 +125,6 @@ We can now add 'search_trains' method.
                 trains.append(train)
         return trains
 ```
-
 #### Payment Manager
 
 Now, we can move on to implement 'PaymentManager'. Since, it is a big design for an interview setting and the focus is not on payments we can have a very simplified version for it. We will simply return True for all the cases.
