@@ -125,6 +125,7 @@ We can now add 'search_trains' method.
                 trains.append(train)
         return trains
 ```
+
 #### Payment Manager
 
 Now, we can move on to implement 'PaymentManager'. Since, it is a big design for an interview setting and the focus is not on payments we can have a very simplified version for it. We will simply return True for all the cases.
@@ -140,6 +141,8 @@ class PaymentManager:
 ```
 
 #### Ticket Manager
+
+##### Ticket class
 
 It's time to implement the 'TicketManager'. Since this class manages tickets, we first need to implement the `Ticket` class. Now, think of an actual ticket in your hand. What does it consist of? Train ID, Origin, Destination, Date of Journey, etc.
 
@@ -184,7 +187,9 @@ class Ticket:
 	self.seats = seats
 ```
 
-If you observe, we have used a class 'TrainSeat' for the seats. Now, we can go ahead and create that class. But where should we have it? Inside TrainManager file. This is because Seats are a part of train and Train class is written in TrainManager file. 
+If you observe, we have used a class 'TrainSeat' for the seats. Now, we can go ahead and create that class. But where should we have it? Inside TrainManager file. This is because Seats are a part of train and Train class is written in TrainManager file.
+
+##### TrainSeat class
 
 ```
 class TrainSeat:
@@ -209,13 +214,43 @@ class Train:
 
 **Something to observe**: We created a new class 'TrainSeat' only when we needed it. We never created it beforehand. And that is the mentality one should have to write code clearly and complete the problem in an interview setting.
 
+Since, seats are a part of Trains we also need to make changes to our Train and TrainManager class. We need to add seats there.
+
+```
+class Train:
+    def __init__(
+        ...
+        schedule: dict[str : (int, datetime.time)],
+        seats: List[TrainSeat],
+    ):
+        ...
+        self.destination: str = list(schedule.keys())[-1]
+        self.seats: List[TrainSeat] = seats
+
+class TrainManager:
+    ...
+
+    def add_train(
+        ...
+        schedule: dict[str : (int, datetime.time)],
+        seats: List[TrainSeat],
+    ):
+        train = Train(train_id, train_name, schedule, seats)
+        ...
+```
+
+##### Methods in TicketManager
+
 Coming back to our TicketManager class now. What methods should we have in it? Well, we can answer that using the diagram we created earlier:
 
 <img src="./images/TicketManager.png" alt="Alt text" width="400"/>
 
+Let's start with method definitions for each of these:
+
 ```
 class TicketManager:
     def __init__(self):
+        # tickets is a dict which maps from user_id to all the tickets that user has booked
         # {user_id: [Ticket1, Ticket2, ...]}
         self.tickets = defaultdict(list)
         self.ticket_counter = 1
@@ -237,3 +272,80 @@ class TicketManager:
     def cancel_ticket(self, user_id: int, ticket_id: int):
         pass
 ```
+
+We can start filling in the `book_ticket` method. And for that I would recommend writing a pseudocode and then only start writing code. This is what I have in mind:
+
+```
+book_ticket:
+1. Try to book seats on the train.
+2. If booking fails, return None.
+3. If booking succeeds:
+   - Create a new ticket with the provided details.
+   - Add the ticket to the user's ticket list.
+   - Increment the ticket counter.
+   - Return the created ticket.
+```
+
+<img src="./images/BookTicketFlowChart.png" alt="Alt text" width="500"/>
+
+And this is the code for it:
+
+```
+    def __init__(self, train_manager: TrainManager):
+        ...
+        self.train_manager = train_manager
+
+    def book_ticket(
+        self,
+        user_id: int,
+        train_id: int,
+        origin: str,
+        destination: str,
+        date_of_journey: datetime.date,
+        seats: List[TrainSeat],
+    ):
+        booking_success = self.train_manager.book_seats(seats)
+
+        if not booking_success:
+            print("Failed to book seats - Seats already booked\n")
+            return None
+
+        ticket = Ticket(
+            self.ticket_counter,
+            user_id,
+            train_id,
+            origin,
+            destination,
+            date_of_journey,
+            seats,
+        )
+        self.tickets[user_id].append(ticket)
+        self.ticket_counter += 1
+        return ticket
+```
+
+The 1st step i.e. booking/reserving seats - Well that needs to be handled by TrainManager class so we will delegate that part to it. And we will add a small method in TrainManager for it:
+
+```
+class TrainManager:
+    ...
+    def search_trains(self, origin: str, destination: str):
+        ...
+
+    def book_seats(self, seats: List[TrainSeat]) -> bool:
+        """
+        Books the provided seats if all are available. This is an atomic operation -
+        either all seats are booked or none.
+        """
+        # First check if all seats are available
+        for seat in seats:
+            if seat.is_booked():
+                return False
+
+        # If all seats are available, book them all
+        for seat in seats:
+            seat.book()
+        return True
+```
+
+Let's continue implementing rest 2 methods in TicketManager.
