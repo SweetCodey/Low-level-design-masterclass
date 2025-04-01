@@ -79,8 +79,8 @@ Now, let's try implementing TrainManager.  The main idea is to implement the met
 **Something to observe**: We created a new method 'add_train' only when we needed it. We never created a method beforehand. And that is the mentality one should have to write code clearly and complete the problem in an interview setting.
 
 ```
-class Train:
-    def init(
+class Train:  
+    def __init__(
         self,
         train_id: int,
         train_name: str,
@@ -106,10 +106,14 @@ class TrainManager:
         train = Train(train_id, train_name, schedule)
         self.trains[train_id] = train
         print(f"Train {train_name} with ID {train_id} has been added successfully.\n")
+```
 
+We can now add 'search_trains' method.
+
+```
     # Go through all the trains and return the trains
     # that have both origin and destination stops in their schedule
-    # and the destination stop is after the origin stop
+    # and the destination stop is after the origin stop  
     def search_trains(self, origin: str, destination: str):
         trains = []
         for train in self.trains.values():
@@ -121,6 +125,7 @@ class TrainManager:
                 trains.append(train)
         return trains
 ```
+
 #### Payment Manager
 
 Now, we can move on to implement 'PaymentManager'. Since, it is a big design for an interview setting and the focus is not on payments we can have a very simplified version for it. We will simply return True for all the cases.
@@ -137,9 +142,11 @@ class PaymentManager:
 
 #### Ticket Manager
 
-It's time now to implement 'TicketManager'. Since this class manages tickets we first need to implement Ticket class. Now, think of an actual ticket in your hand. What does that consist of? Train Id, Origin, Destination, Date of Journey, etc.
+It's time to implement the 'TicketManager'. Since this class manages tickets, we first need to implement the `Ticket` class. Now, think of an actual ticket in your hand. What does it consist of? Train ID, Origin, Destination, Date of Journey, etc.
 
-![Ticket](./images/Ticket.png)
+**Thing to remember:** Whenever you think about writing classes for real-world objects, visualize that object in real life. This approach makes writing code easier.
+
+<img src="./images/Ticket.png" alt="Alt text" width="600"/>
 
 So, that's what we fill in this class.
 
@@ -163,3 +170,71 @@ class Ticket:
         self.ticket_status: str = "CONFIRMED"
 ```
 
+Now, if you see the ticket, we have missed adding a very important thing there which is 'Seats'. So, let's add that to our Train class.
+
+```
+class Ticket:
+    def init(
+        ...
+        date_of_journey: datetime.date,
+	seats: List[TrainSeat],
+    ):
+        ...
+        self.date_of_journey: datetime.date = date_of_journey
+        self.ticket_status: str = "CONFIRMED"
+	self.seats = seats
+```
+
+If you observe, we have used a class 'TrainSeat' for the seats. Now, we can go ahead and create that class. But where should we have it? Inside TrainManager file. This is because Seats are a part of train and Train class is written in TrainManager file. 
+
+```
+class TrainSeat:
+    def __init__(self, seat_id: int, train_id: int):
+        self.seat_id = seat_id
+        self.train_id = train_id
+        self.__is_booked = False
+
+    def book(self):
+        self.__is_booked = True
+
+    def unbook(self):
+        self.__is_booked = False
+
+    def is_booked(self):
+        return self.__is_booked
+
+class Train:
+    def __init__(
+        ....
+```
+
+**Something to observe**: We created a new class 'TrainSeat' only when we needed it. We never created it beforehand. And that is the mentality one should have to write code clearly and complete the problem in an interview setting.
+
+Coming back to our TicketManager class now. What methods should we have in it? Well, we can answer that using the diagram we created earlier:
+
+<img src="./images/TicketManager.png" alt="Alt text" width="400"/>
+
+```
+class TicketManager:
+    def __init__(self):
+        # {user_id: [Ticket1, Ticket2, ...]}
+        self.tickets = defaultdict(list)
+        self.ticket_counter = 1
+
+    def book_ticket(
+        self,
+        user_id: int,
+        train_id: int,
+        origin: str,
+        destination: str,
+        date_of_journey: datetime.date,
+        seats: List[TrainSeat],
+    ):
+        pass
+
+    def get_tickets(self, user_id):
+        pass
+
+    def cancel_ticket(self, user_id: int, ticket_id: int):
+        pass
+```
