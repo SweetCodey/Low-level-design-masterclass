@@ -348,4 +348,93 @@ class TrainManager:
         return True
 ```
 
-Let's continue implementing rest 2 methods in TicketManager.
+Let's continue implementing rest 2 methods in TicketManager. `get_tickets` is a simple one where we simply get all the tickets for that user using `tickets` dictionary we created earlier.
+
+```
+class TicketManager:
+    def __init__(self, train_manager: TrainManager):
+        # {user_id: [Ticket1, Ticket2, ...]}
+        self.tickets = defaultdict(list)
+        self.ticket_counter = 1
+        self.train_manager = train_manager
+
+    def book_ticket(
+        ...
+
+    def get_tickets(self, user_id):
+        return self.tickets.get(user_id)
+```
+
+Now, let's try implementing `cancel_ticket`. Again for this we will write down the pseudocode and then only implement it.
+
+```
+cancel_ticket:
+1. Retrieve the user's tickets and find the ticket with the specified ticket_id.
+2. If the ticket exists:
+   - Check if the cancellation is within 3 days of the journey.
+     - If not, print an error message and return False.
+   - Attempt to unbook the seats using the train manager.
+     - If unbooking succeeds: Mark the ticket as cancelled and return True
+     - If unbooking fails, return False.
+3. If the ticket does not exist, return False.
+```
+
+<img src="./images/CancelTicketFlowChart.png" alt="Alt text"/>
+
+And this is the code for it:
+
+```
+class TicketManager:
+    ...
+    def get_tickets(self, user_id):
+        return self.tickets.get(user_id)
+
+    def cancel_ticket(self, user_id: int, ticket_id: int):
+        tickets = self.tickets[user_id]
+        ticket = next(
+            (ticket for ticket in tickets if ticket.ticket_id == ticket_id), None
+        )
+        if ticket:
+            if (ticket.date_of_journey - datetime.now().date()).days < 3:
+                print("Cannot cancel the ticket. Not within 3 days of journey.\n")
+                return False
+
+            unbooking_success = self.train_manager.unbook_seats(ticket.seats)
+            if unbooking_success:
+                ticket.set_cancelled_status()
+                print(f"Ticket ID: {ticket_id} has been canceled.\n")
+                return True
+            else:
+                print(f"Failed to cancel ticket ID: {ticket_id}\n")
+                return False
+        return False
+```
+
+If you notice we introduced 2 methods `self.train_manager.unbook_seats(ticket.seats)` and `ticket.set_cancelled_status()`. These are part of TrainManager and Ticket class. Similar to how we created method for booking seats in TrainManager we need to create a method for unbooking seats there. The reason being the same - Booking/Reserving seats in a train is TrainManager's responsibility. Here's a simple implementation for it:
+
+```
+class TrainManager:
+    ...
+
+    def book_seats(self, seats: List[TrainSeat]) -> bool:
+        ...
+
+    def unbook_seats(self, seats: List[TrainSeat]) -> bool:
+        for seat in seats:
+            seat.unbook()
+        return True
+
+```
+
+Now, for `ticket.set_cancelled_status()` we go to our Ticket class:
+
+```
+class Ticket:
+    def __init__(
+        ...
+        self.seats: List[TrainSeat] = seats
+        self.ticket_status: str = "CONFIRMED"
+
+    def set_cancelled_status(self):
+        self.ticket_status = "CANCELLED"
+```
