@@ -9,9 +9,9 @@ This repository contains structured resources for mastering **Low-Level Design (
 - **System Designs** – Real-world LLD problems with code implementations  
 
 ## 📂 Repository Structure  
-- `OOP/` – Fundamentals of Object-Oriented Programming  
+- [WIP] `oop-concepts/` – Fundamentals of Object-Oriented Programming  
 - `solid-principles/` – Detailed explanations and examples of SOLID principles  
-- `DesignPatterns/` – Common design patterns with real-world use cases  
-- `LLD/` – System design problems with solutions  
+- [WIP] `design-patterns/` – Common design patterns with real-world use cases  
+- `design-problems/` – System design problems with solutions  
 
 🔹 **Contributions Welcome!** Feel free to raise issues and submit PRs. 🚀  
