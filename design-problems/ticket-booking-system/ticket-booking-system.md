@@ -9,9 +9,9 @@
 1. Users should be able to search for trains going from origin to destination at a particular time.
    For simplicity we assume all the trains run on all weekdays.
 2. User should be able to book a particular train for any number of seats.
-3. Users can choose between different train seat classes - Standard, Deluxe, etc.
-4. User should be able to view all upcoming and previous bookings.
-5. User should be able to cancel a booking if it is before 3 days of departure.
+3. User should be able to view all upcoming and previous bookings.
+4. User should be able to cancel a booking if it is before 3 days of departure.
+5. [Extended Requirement] Users can choose between different train seat classes - Standard, Deluxe, etc.
 
 ### Use Cases
 
@@ -528,4 +528,107 @@ Now, a few questions arise:
   * Train Objects maintain seats. So we can iterate through all those seats and check how many are available. And that is why we can give this responsibility to Train Manager.
 * How do we calculate the price of a journey? And whose responsibility should it be?
   * Price can be calculated in many different ways but here we will do a simple implementation where we have a fixed cost and a dynamic cost per km. We will dive more deeper into it pretty soon.
-  * Now, whose reponsibility should it be? We can create another manager 'PricingManager' to handle this. We can also take the route of having just a method calculate_price but since I expect future changes in price calculation (besed on seat types) I will go forward with having a new manager class.
+  * Now, whose reponsibility should it be? We can create another manager 'PricingManager' to handle this. We can also take the route of having just a method `calculate_price` but since I expect future changes in price calculation (besed on seat types) I will go forward with having a new manager class.
+
+Let's see all of the code changes for these:
+
+1. TicketBookingSystem: We first write the `book_ticket` method according to our flow chart. Here we have assumed different methods like
+   `train_manager.find_available_seats`, and `pricing_manager.calculate_price`.
+
+```
+class TicketBookingSystem:
+    ...
+
+    def search_trains(self, origin: str, destination: str) -> List[Train]:
+        ...
+
+    def book_ticket(
+        self,
+        user_id: int,
+        train_id: int,
+        origin: str,
+        destination: str,
+        date_of_journey: datetime.date,
+        seats_required: int,
+    ) -> Optional[Ticket]:
+        final_seats = self.train_manager.find_available_seats(train_id, seats_required)
+        if not final_seats:
+            print("Seats are not available. Ticket booking failed.\n")
+            return None
+
+        price = self.pricing_manager.calculate_price(
+            train_id, origin, destination, seats_required
+        )
+
+        if self.payment_manager.process_payment(user_id, price):
+            ticket = self.ticket_manager.book_ticket(
+                user_id, train_id, origin, destination, date_of_journey, final_seats
+            )
+            print(f"Ticket booked successfully. Ticket ID: {ticket.ticket_id}\n")
+            return ticket
+
+        print("Payment failed. Ticket booking failed.\n")
+        return None
+
+    ...
+```
+
+2. `train_manager.find_available_seats`:
+
+```
+class Train:
+    ...
+
+    def find_available_seats(self, seats_required: int) -> List[TrainSeat]:
+        available_seats = []
+        for seat in self.seats:
+            if not seat.is_booked():
+                available_seats.append(seat)
+            if len(available_seats) == seats_required:
+                return available_seats
+        return None
+
+class TrainManager:
+    ...
+
+    def find_available_seats(self, train_id: int, seats_required: int) -> List[TrainSeat]:
+    	return self.trains[train_id].find_available_seats(seats_required)
+
+```
+
+3. `pricing_manager.calculate_price`:
+
+```
+class PricingManager:
+    def __init__(self, train_manager: TrainManager):
+        self.train_manager = train_manager
+        self.fixed_price = 100
+        self.dynamic_price_per_km = 1
+
+    def calculate_price(
+        self,
+        train_id: int,
+        origin: str,
+        destination: str,
+        required_seats: int,
+    ) -> int:
+        distance = self.train_manager.get_train(train_id).get_distance(
+            origin, destination
+        )
+
+        total_price_per_seat = self.fixed_price + (self.dynamic_price_per_km * distance)
+        return total_price_per_seat * required_seats
+
+```
+
+<img src="./images/PricingManagerAdded.png" alt="Alt text"/>
+
+For calculating price we also need to implement a method in Train class known as `get_distance` which will return distance between 2 places.
+
+```
+class Train:
+    ...
+
+    def get_distance(self, origin: str, destination: str):
+        return self.schedule[destination][0] - self.schedule[origin][0]
+```
