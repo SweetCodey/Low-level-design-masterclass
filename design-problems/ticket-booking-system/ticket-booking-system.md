@@ -443,7 +443,9 @@ This ends the implementation of all the classes we planned earlier.
 
 ### 5. TicketBookingSystem
 
-Now, lets implement Step 3 i.e. creating a main manager to manage all these managers (TicketManager, TrainManager, etc.). We will call this as `TicketBookingSystem`. The user interacts with the `TicketBookingSystem`, which then delegates tasks to the appropriate managers. This creates a clean separation of concerns and makes the system more maintainable.![Ticket Booking System Overview](https://file+.vscode-resource.vscode-cdn.net/Users/rohitjain/Desktop/GitHub/Low-level-design-masterclass/design-problems/ticket-booking-system/images/TicketBookingSystem.png)
+Now, lets implement Step 3 i.e. creating a main manager to manage all these managers (TicketManager, TrainManager, etc.). We will call this as `TicketBookingSystem`. The user interacts with the `TicketBookingSystem`, which then delegates tasks to the appropriate managers. This creates a clean separation of concerns and makes the system more maintainable.
+
+<img src="./images/TicketBookingSystem.png" alt="Alt text"/>
 
 Now, let's start with a very basic implementation with the TicketBookingSystem calling different managers within its methods. We have implemented all of the methods except the `book_ticket` here. We will cover that later.
 
@@ -632,3 +634,5 @@ class Train:
     def get_distance(self, origin: str, destination: str):
         return self.schedule[destination][0] - self.schedule[origin][0]
 ```
+
+This completes our implementation. Now let's test things out using our main class.
