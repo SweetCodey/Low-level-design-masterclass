@@ -438,3 +438,94 @@ class Ticket:
     def set_cancelled_status(self):
         self.ticket_status = "CANCELLED"
 ```
+
+This ends the implementation of all the classes we planned earlier.
+
+### 5. TicketBookingSystem
+
+Now, lets implement Step 3 i.e. creating a main manager to manage all these managers (TicketManager, TrainManager, etc.). We will call this as `TicketBookingSystem`. The user interacts with the `TicketBookingSystem`, which then delegates tasks to the appropriate managers. This creates a clean separation of concerns and makes the system more maintainable.![Ticket Booking System Overview](https://file+.vscode-resource.vscode-cdn.net/Users/rohitjain/Desktop/GitHub/Low-level-design-masterclass/design-problems/ticket-booking-system/images/TicketBookingSystem.png)
+
+Now, let's start with a very basic implementation with the TicketBookingSystem calling different managers within its methods. We have implemented all of the methods except the `book_ticket` here. We will cover that later.
+
+```
+class TicketBookingSystem:
+    def __init__(self):
+        self.user_manager = UserManager()
+        self.train_manager = TrainManager()
+        self.ticket_manager = TicketManager(self.train_manager)
+        self.payment_manager = PaymentManager()
+
+    def add_user(self, name: str, email: str, phone: str) -> None:
+        self.user_manager.add_user(name, email, phone)
+
+    def add_train(
+        self,
+        train_id: int,
+        train_name: str,
+        schedule: Dict[str, Tuple[int, datetime.time]],
+        total_seats: int,
+    ) -> None:
+        self.train_manager.add_train(train_id, train_name, schedule, total_seats)
+
+    def search_trains(self, origin: str, destination: str) -> List[Train]:
+        return self.train_manager.search_trains(origin, destination)
+
+    def book_ticket(
+        self,
+        user_id: int,
+        train_id: int,
+        origin: str,
+        destination: str,
+        date_of_journey: datetime.date,
+        seats_required: int,
+    ) -> Optional[Ticket]:
+        pass
+
+    def get_tickets(self, user_id: int) -> Optional[List[Ticket]]:
+        return self.ticket_manager.get_tickets(user_id)
+
+    def cancel_ticket(self, user_id: int, ticket_id: int) -> bool:
+        return self.ticket_manager.cancel_ticket(user_id, ticket_id)
+
+```
+
+In the above code we have called `self.train_manager.add_train(train_id, train_name, schedule, total_seats)` where `total_seats` is an integer but the current definition of `train_manager.add_train()` takes in `seats: List[TrainSeat]`. So, let's go ahead and fix that.
+
+```
+class TrainManager:
+    def __init__(self):
+        self.trains: dict[int:Train] = {}
+
+    def add_train(
+        self,
+        train_id: int,
+        train_name: str,
+        schedule: dict[str : (int, datetime.time)],
+        total_seats: int,
+    ):
+        seats = [TrainSeat(i, train_id) for i in range(1, total_seats+1)]
+        train = Train(train_id, train_name, schedule, seats)
+        self.trains[train_id] = train
+        print(f"Train {train_name} with ID {train_id} has been added successfully.\n")
+```
+
+Now, let's cover `book_ticket` . Let's first write down a basic pseudocode for it.
+
+```
+1. Find available seats  
+    1.1 If less seats are available, return None  
+2. Calculate the price for the journey based on the train, origin, destination
+3. Process the payment for the user  
+    3.1 If payment is successful, book the ticket and return it  
+    3.2 If payment fails, return None
+```
+
+<img src="./images/BookTicketTrainManagerFlowChart.png" alt="Alt text" width="500"/>
+
+Now, a few questions arise:
+
+* How do we find available seats? And whose responsibility should it be?
+  * Train Objects maintain seats. So we can iterate through all those seats and check how many are available. And that is why we can give this responsibility to Train Manager.
+* How do we calculate the price of a journey? And whose responsibility should it be?
+  * Price can be calculated in many different ways but here we will do a simple implementation where we have a fixed cost and a dynamic cost per km. We will dive more deeper into it pretty soon.
+  * Now, whose reponsibility should it be? We can create another manager 'PricingManager' to handle this. We can also take the route of having just a method calculate_price but since I expect future changes in price calculation (besed on seat types) I will go forward with having a new manager class.
