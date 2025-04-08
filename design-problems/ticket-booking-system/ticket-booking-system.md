@@ -84,24 +84,24 @@ class Train:
         self,
         train_id: int,
         train_name: str,
-        schedule: dict[str : (int, datetime.time)]
+        schedule: dict[str: (int, time)],
     ):
         self.train_id: int = train_id
         self.train_name: int = train_name
         # schedule: {location: (distance, time)}
-        self.schedule: dict[str : (int, datetime.time)] = schedule
+        self.schedule: dict[str: (int, time)] = schedule
         self.origin: str = list(schedule.keys())[0]
         self.destination: str = list(schedule.keys())[-1]
 
 class TrainManager:
     def __init__(self):
-        self.trains: dict[int:Train] = {}
+        self.trains: dict[int, Train] = {}
 
     def add_train(
         self,
         train_id: int,
         train_name: str,
-        schedule: dict[str : (int, datetime.time)]
+        schedule: dict[str, (int, time)],
     ):
         train = Train(train_id, train_name, schedule)
         self.trains[train_id] = train
@@ -220,7 +220,7 @@ Since, seats are a part of Trains we also need to make changes to our Train and 
 class Train:
     def __init__(
         ...
-        schedule: dict[str : (int, datetime.time)],
+        schedule: dict[str: (int, time)],
         seats: List[TrainSeat],
     ):
         ...
@@ -232,7 +232,7 @@ class TrainManager:
 
     def add_train(
         ...
-        schedule: dict[str : (int, datetime.time)],
+        schedule: dict[str, (int, time)],
         seats: List[TrainSeat],
     ):
         train = Train(train_id, train_name, schedule, seats)
@@ -731,3 +731,5 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+
+You can check the complete implementation until now in the [final_code_v1.py](./code/final_code_v1.py) file.
