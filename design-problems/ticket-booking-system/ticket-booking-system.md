@@ -84,24 +84,24 @@ class Train:
         self,
         train_id: int,
         train_name: str,
-        schedule: dict[str : (int, datetime.time)]
+        schedule: dict[str: (int, time)],
     ):
         self.train_id: int = train_id
         self.train_name: int = train_name
         # schedule: {location: (distance, time)}
-        self.schedule: dict[str : (int, datetime.time)] = schedule
+        self.schedule: dict[str: (int, time)] = schedule
         self.origin: str = list(schedule.keys())[0]
         self.destination: str = list(schedule.keys())[-1]
 
 class TrainManager:
     def __init__(self):
-        self.trains: dict[int:Train] = {}
+        self.trains: dict[int, Train] = {}
 
     def add_train(
         self,
         train_id: int,
         train_name: str,
-        schedule: dict[str : (int, datetime.time)]
+        schedule: dict[str, (int, time)],
     ):
         train = Train(train_id, train_name, schedule)
         self.trains[train_id] = train
@@ -220,7 +220,7 @@ Since, seats are a part of Trains we also need to make changes to our Train and 
 class Train:
     def __init__(
         ...
-        schedule: dict[str : (int, datetime.time)],
+        schedule: dict[str: (int, time)],
         seats: List[TrainSeat],
     ):
         ...
@@ -232,7 +232,7 @@ class TrainManager:
 
     def add_train(
         ...
-        schedule: dict[str : (int, datetime.time)],
+        schedule: dict[str, (int, time)],
         seats: List[TrainSeat],
     ):
         train = Train(train_id, train_name, schedule, seats)
@@ -625,7 +625,7 @@ class PricingManager:
 
 <img src="./images/PricingManagerAdded.png" alt="Alt text"/>
 
-For calculating price we also need to implement a method in Train class known as `get_distance` which will return distance between 2 places.
+For calculating price we also need to implement a method in Train class known as `get_distance` which will return distance between 2 places. Along with that we also need `get_train` method in TrainManager.
 
 ```
 class Train:
@@ -633,6 +633,103 @@ class Train:
 
     def get_distance(self, origin: str, destination: str):
         return self.schedule[destination][0] - self.schedule[origin][0]
+
+class TrainManager:
+    ...
+  
+    def get_train(self, train_id: int) -> Train:
+        return self.trains.get(train_id)
+```
+
+Also, let's update our TicketBookingSystem's initialization to include the PricingManager:
+
+```python
+class TicketBookingSystem:
+    def __init__(self):
+        self.user_manager = UserManager()
+        self.train_manager = TrainManager()
+        self.payment_manager = PaymentManager()
+        self.pricing_manager = PricingManager(self.train_manager)
+        self.ticket_manager = TicketManager(self.train_manager)
+  
+    ...
 ```
 
 This completes our implementation. Now let's test things out using our main class.
+
+### 6. Test using Main class
+
+```python
+from datetime import datetime, time, date, timedelta
+
+def main():
+    # Create the ticket booking system
+    booking_system = TicketBookingSystem()
+  
+    # Add users
+    booking_system.add_user("Alice", "alice@example.com", "1234567890")
+    booking_system.add_user("Bob", "bob@example.com", "0987654321")
+  
+    # Add trains with schedules
+    # Schedule format: {location: (distance_from_origin, arrival_time)}
+    train1_schedule = {
+        "New York": (0, time(hour=6, minute=0)),
+        "Philadelphia": (150, time(hour=7, minute=30)),
+        "Washington DC": (350, time(hour=9, minute=0))
+    }
+  
+    train2_schedule = {
+        "Boston": (0, time(hour=8, minute=0)),
+        "New York": (220, time(hour=10, minute=30)),
+        "Philadelphia": (370, time(hour=12, minute=0)),
+        "Washington DC": (570, time(hour=14, minute=0))
+    }
+  
+    booking_system.add_train(101, "Express Northeast", train1_schedule, 50)
+    booking_system.add_train(102, "Regional Express", train2_schedule, 100)
+  
+    # Search for trains
+    print("Searching for trains from New York to Washington DC:")
+    trains = booking_system.search_trains("New York", "Washington DC")
+    for train in trains:
+        print(f"Found train: {train.train_name} (ID: {train.train_id})")
+  
+    # Book tickets
+    journey_date = date.today() + timedelta(days=10)
+    ticket1 = booking_system.book_ticket(
+        user_id=1, 
+        train_id=101, 
+        origin="New York", 
+        destination="Washington DC", 
+        date_of_journey=journey_date, 
+        seats_required=2
+    )
+  
+    # View bookings
+    print("\nViewing tickets for user 1:")
+    user_tickets = booking_system.get_tickets(1)
+    if user_tickets:
+        for ticket in user_tickets:
+            print(f"Ticket ID: {ticket.ticket_id}, Train: {ticket.train_id}, " 
+                  f"From: {ticket.origin}, To: {ticket.destination}, "
+                  f"Date: {ticket.date_of_journey}, Status: {ticket.ticket_status}")
+  
+    # Cancel a ticket
+    print("\nCancelling ticket:")
+    if ticket1:
+        booking_system.cancel_ticket(1, ticket1.ticket_id)
+  
+        # View bookings again
+        print("\nViewing tickets for user 1 after cancellation:")
+        user_tickets = booking_system.get_tickets(1)
+        if user_tickets:
+            for ticket in user_tickets:
+                print(f"Ticket ID: {ticket.ticket_id}, Train: {ticket.train_id}, "
+                      f"From: {ticket.origin}, To: {ticket.destination}, "
+                      f"Date: {ticket.date_of_journey}, Status: {ticket.ticket_status}")
+
+if __name__ == "__main__":
+    main()
+```
+
+You can check the complete implementation until now in the [final_code_v1.py](./code/final_code_v1.py) file.
