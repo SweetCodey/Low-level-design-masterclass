@@ -12,6 +12,8 @@ This repository contains structured resources for mastering **Low-Level Design (
 - [WIP] `oop-concepts/` – Fundamentals of Object-Oriented Programming  
 - `solid-principles/` – Detailed explanations and examples of SOLID principles  
 - [WIP] `design-patterns/` – Common design patterns with real-world use cases  
-- `design-problems/` – System design problems with solutions  
+- `design-problems/` – System design problems with solutions
+  - `elevator-system/` – Elevator system design with code implementation
+  - `parking-lot-system/` – Parking lot system design with code implementation  
 
 🔹 **Contributions Welcome!** Feel free to raise issues and submit PRs. 🚀  
