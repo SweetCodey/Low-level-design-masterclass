@@ -30,22 +30,11 @@ if __name__ == "__main__":
     car = Vehicle("KA-01-1234", VehicleType.CAR)
     bike = Vehicle("KA-05-9876", VehicleType.BIKE)
 
-    print("--- Car entering ---")
     ticket1 = entrance.enter(car)
-    if ticket1:
-        print(f"  Car parked at spot {ticket1.get_spot().get_id()}")
-
-    print("--- Bike entering ---")
     ticket2 = entrance.enter(bike)
-    if ticket2:
-        print(f"  Bike parked at spot {ticket2.get_spot().get_id()}")
 
-    print("--- Car exiting ---")
     if ticket1:
         exit_gate.exit(ticket1)
-        print(f"  Spot {ticket1.get_spot().get_id()} is now free: {ticket1.get_spot().available()}")
 
-    print("--- Bike exiting ---")
     if ticket2:
         exit_gate.exit(ticket2)
-        print(f"  Spot {ticket2.get_spot().get_id()} is now free: {ticket2.get_spot().available()}")
