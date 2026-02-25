@@ -1,9 +1,5 @@
-from enum import Enum
+from enums import VehicleType
 
-class VehicleType(Enum):
-    BIKE = "BIKE"
-    CAR = "CAR"
-    TRUCK = "TRUCK"
 
 class Vehicle:
     def __init__(self, number: str, vehicle_type: VehicleType):
@@ -15,6 +11,3 @@ class Vehicle:
 
     def get_type(self) -> VehicleType:
         return self.type
-
-class ParkingLotSystem:
-    pass  # will fill later
