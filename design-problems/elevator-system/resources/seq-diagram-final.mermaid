@@ -1,0 +1,47 @@
+sequenceDiagram
+    actor Passenger
+    participant HallButton
+    participant ElevatorButton
+    participant ElevatorSystem
+    participant DispatchStrategy
+    participant ElevatorCar
+    participant Door
+    participant Display
+
+    rect rgb(230, 245, 255)
+        Note over Passenger, Display: Activity 1 — Passenger Calls Elevator
+        Passenger->>HallButton: pressDown(direction)
+        HallButton->>ElevatorSystem: callElevator(floor, direction)
+    end
+
+    rect rgb(220, 240, 220)
+        Note over Passenger, Display: Activity 2 — System Dispatches Using Strategy
+        ElevatorSystem->>DispatchStrategy: selectCar(cars, floor)
+        DispatchStrategy-->>ElevatorSystem: bestCar
+        ElevatorSystem->>ElevatorCar: move(floor)
+    end
+
+    rect rgb(255, 245, 220)
+        Note over Passenger, Display: Activity 3 — Car Arrives at Passenger's Floor
+        ElevatorCar->>Display: update(floor, direction)
+        ElevatorCar-->>ElevatorSystem: arrived(floor)
+        ElevatorSystem->>HallButton: reset()
+        ElevatorSystem->>Door: open()
+        Door-->>Passenger: Passenger enters
+    end
+
+    rect rgb(255, 230, 230)
+        Note over Passenger, Display: Activity 4 — Passenger Selects Destination
+        Passenger->>ElevatorButton: pressDown(destinationFloor)
+        ElevatorButton->>ElevatorSystem: selectFloor(floor)
+        ElevatorSystem->>Door: close()
+    end
+
+    rect rgb(235, 225, 255)
+        Note over Passenger, Display: Activity 5 — Passenger Arrives at Destination
+        ElevatorSystem->>ElevatorCar: move(floor)
+        ElevatorCar->>Display: update(floor, direction)
+        ElevatorCar-->>ElevatorSystem: arrived(floor)
+        ElevatorSystem->>Door: open()
+        Door-->>Passenger: Passenger exits
+    end
