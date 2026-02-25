@@ -1,0 +1,35 @@
+sequenceDiagram
+    actor Passenger
+    participant HallButton
+    participant EmergencyButton
+    participant ElevatorSystem
+    participant DispatchStrategy
+    participant ElevatorCar
+    participant Door
+
+    rect rgb(255, 230, 230)
+        Note over Passenger, Door: Edge Case 1 — Car in Maintenance
+        Passenger->>HallButton: pressDown(direction)
+        HallButton->>ElevatorSystem: callElevator(floor, direction)
+        ElevatorSystem->>DispatchStrategy: selectCar(cars, floor)
+        Note over DispatchStrategy: Skips Car 1 (MAINTENANCE)
+        DispatchStrategy-->>ElevatorSystem: Car 2 (next best)
+        ElevatorSystem->>ElevatorCar: move(floor)
+    end
+
+    rect rgb(255, 245, 220)
+        Note over Passenger, Door: Edge Case 2 — Car is Overloaded
+        ElevatorSystem->>ElevatorCar: move(floor)
+        Note over ElevatorCar: state == OVERLOADED
+        ElevatorCar-->>ElevatorSystem: refused (overloaded)
+        Note over ElevatorCar: Triggers alarm, does not move
+    end
+
+    rect rgb(235, 225, 255)
+        Note over Passenger, Door: Edge Case 3 — Emergency Button Pressed
+        Passenger->>EmergencyButton: pressDown()
+        EmergencyButton->>ElevatorCar: emergencyStop()
+        Note over ElevatorCar: state → IDLE
+        ElevatorCar->>Door: close()
+        Note over ElevatorCar: Car stops, doors stay closed
+    end
